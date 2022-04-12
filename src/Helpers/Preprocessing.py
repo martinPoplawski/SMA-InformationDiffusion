@@ -1,5 +1,7 @@
 import csv  
 import time
+from Helpers import print
+
 
 class Tweet:
     person1: int
@@ -69,7 +71,7 @@ def checkFile(file):
 
 
 #combineFiles()
-#checkFile("src/data/preprocessed_1648560717.csv") #file is correct
+checkFile("src/data/preprocessed_1648560717.csv") #file is correct
 
         
         
