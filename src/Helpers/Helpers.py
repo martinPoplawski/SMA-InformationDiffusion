@@ -1,5 +1,6 @@
 import Config
 from builtins import print as pp
+import shutil
 
 def print(message):
     """
@@ -8,18 +9,27 @@ def print(message):
     if Config.verbose:
         pp(message)
 
-def progress(amount, max, steps=1, length=100):
+def progress(amount, max, steps=1, length=None):
     """
     prints a progress bar
+    amount: the current amount of progress
+    max: the maximum amount of progress
+    [steps=1: for optimization, not to call IO too much]
+    [length=100: the length of the progress bar]
     """
+
     if Config.verbose:
+        if length is None:
+            length, _ = shutil.get_terminal_size()
+            length = length - 8 #fixed amount of characters
+            length = length - len(f"{(max+1):,}") -len(f"{amount:,}")
         max -= 1
-        if amount > max:
-            print("cant print progress bar")
+        if amount > max+1:
+            pp("cant print progress bar")
             return                    
         if amount % steps == 0 or amount == max:                  
             percent = int(amount *length / max)
-            estimatedProgress = ("~" if steps != 1 else "") + f"{amount:,}/{max:,}".replace(",", "'")
+            estimatedProgress = ("~" if steps != 1 else "") + f"{amount:,}/{(max+1):,}".replace(",", "'")
             prog = "[" + "#" * percent + "-" * (length - percent)
             endNl = "\n" if amount == max else ""                       
             pp("\r" + prog + f"]{percent}% {estimatedProgress}", end=endNl)
