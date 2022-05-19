@@ -82,14 +82,18 @@ def pushNxToNeo4j(G):
     driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", "socialmediaanalytics"))
     with driver.session() as session:
     
+        print("Pushing nodes with weights")
+        lenNodes = len(G.nodes())
+        for i, node in enumerate(G.nodes(data=True)):
+            session.run("MERGE (n:Node {id:$id, weight:$weight})", id=node[0], weight=node[1]["weight"])
+            progress(i, lenNodes, steps=STEPS)
+
         #push all edges with their weights and timestamp from Nx to neo4j
-        print("Pushing edges and nodes")
+        print("Pushing edges")
+        lenEdges = len(G.edges())
         for i, edge in enumerate(G.edges(data=True)):
-            session.run("MERGE (n:Node {id: $id})", id=edge[0])
-            session.run("MERGE (m:Node {id: $id})", id=edge[1])
-            #add edge edge[0] - edge[1] to neo4j
             session.run("MATCH (n:Node {id: $id}), (m:Node {id: $id2}) MERGE (n)-[r:Edge {weight: $weight, timestamp: $timestamp}]->(m)", id=edge[0], id2=edge[1], weight=edge[2]["weight"], timestamp=edge[2]["timestamp"])
-            progress(i, len(G.edges()), steps=STEPS)
+            progress(i, lenEdges, steps=STEPS)
 
 
 """
