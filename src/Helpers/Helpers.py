@@ -1,6 +1,7 @@
 import Config
 from builtins import print as pp
 import shutil
+from time import sleep
 
 def print(message):
     """
@@ -46,7 +47,8 @@ if __name__ == "__main__":
     print("")
 
     progress(50, 100)
-    progress(100, 100)   
+    progress(100, 100)
+    sleep(2)   
 
     progress(50000, 100000, steps=1000)
     print("")

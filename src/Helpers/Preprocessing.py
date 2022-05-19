@@ -31,7 +31,9 @@ class Tweet:
     def __str__(self) -> str:
         return f"{self.person1=}, {self.person2=}, {self.timestamp=}"
  
-
+"""
+a holder class for adding tweets to a set with a custom add function
+"""
 class Tweets:
     tweets: set[Tweet]
     def __init__(self):
@@ -62,6 +64,9 @@ class Vertex:
     def __ne__(self, other):
         return self.id != other.id
 
+"""
+a holder class for adding vertices to a set with a custom add function
+"""
 class Vertices:
     vertices: set[Vertex]
     def __init__(self):
@@ -75,9 +80,11 @@ class Vertices:
             self.vertices.remove(vertex)
             self.vertices.add(vertex)
 
-
+"""
+combines higgs activity and social network edgelist into a CSV and returns the filename
+"""
 def combineFiles():
-    with open("src/data/higgs-activity_time.txt") as activity_file, open("src/data/higgs-social_network.edgelist") as social_file:
+    with open("data/higgs-activity_time.txt") as activity_file, open("data/higgs-social_network.edgelist") as social_file:
         activity = csv.reader(activity_file)
         social = csv.reader(social_file)
 
@@ -95,7 +102,7 @@ def combineFiles():
             progress(i, 14855841, steps=10000)                     
         
         filename = f"preprocessed_{int(time.time())}"
-        with open(f"src/data/{filename}.csv", "w", newline="") as file:
+        with open(f"data/{filename}.csv", "w", newline="") as file:
             data = csv.writer(file)
             print(f"writing edgelist to csv {filename}.csv")
             #data.writerow(["person1", "person2", "weight", "timestamp"])
@@ -103,8 +110,12 @@ def combineFiles():
                 data.writerow([tweet.person1, tweet.person2, tweet.weight, tweet.timestamp])
                 progress(i, len(tweets.tweets), steps=1000)       
 
-        generateVertexListFromTweets(tweets.tweets, filename)    
+        generateVertexListFromTweets(tweets.tweets, filename) 
+    return filename   
 
+"""
+generates a vertexlist from a set of tweets and stores them in a csv
+"""
 def generateVertexListFromTweets(tweets, filename):
     vertices = Vertices()
     for i, tweet in enumerate(tweets):                
@@ -112,7 +123,7 @@ def generateVertexListFromTweets(tweets, filename):
         vertices.add(Vertex(tweet.person2, 1))
         progress(i, len(tweets), steps=1000)
     #store vertices in csv
-    with open(f"src/data/{filename}_vertexlist.csv", "w", newline="") as file:
+    with open(f"data/{filename}_vertexlist.csv", "w", newline="") as file:
         data = csv.writer(file)        
         #write vertices and their weights to csv
         print(f"writing vertexlist to {filename}_vertexlist.csv")
@@ -121,7 +132,9 @@ def generateVertexListFromTweets(tweets, filename):
             progress(i, len(vertices.vertices), steps=1000)
 
 
-
+"""
+reads in a csv and returns a set of tweets
+"""
 def openFile(file) -> set[Tweet]:
     tweets = set()
     with open(file) as file:
@@ -130,22 +143,13 @@ def openFile(file) -> set[Tweet]:
             tweets.add(Tweet(edge[0], edge[1], edge[2]))
     return tweets
 
-def checkFile(file):
-    tweets = openFile(file)
-    print("read file")
-    count = 0
-    for edge in tweets:
-        if edge.timestamp != "0": #edge.timestamp is somehow a string...
-            count += 1
-    print(f"{count=}, {len(tweets)=}")
-
+"""
+this function can be used if you fucked up the vertexlist generation
+it allows you to generate the vertexlist from the edgelist csv
+"""
 def fuuuuuuck():
-    """
-    this function can be used if you fucked up the vertexlist generation
-    it allows you to generate the vertexlist from the edgelist csv
-    """
     filename = "preprocessed_1652172596"
-    with open(f"src/data/{filename}.csv") as file:        
+    with open(f"data/{filename}.csv") as file:        
         vertices = set()
         reader = csv.reader(file)
         for i, edge in enumerate(reader):            
@@ -154,7 +158,7 @@ def fuuuuuuck():
             progress(i, 15056958, steps=1000)                           
 
     #store vertices in csv
-    with open(f"src/data/{filename}_vertexlist.csv", "w", newline="") as file:
+    with open(f"data/{filename}_vertexlist.csv", "w", newline="") as file:
         data = csv.writer(file)        
         #write vertices and their weights to csv
         print(f"writing vertexlist to {filename}_vertexlist.csv")

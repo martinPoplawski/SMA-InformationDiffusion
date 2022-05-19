@@ -7,8 +7,11 @@ from neo4j import GraphDatabase
 from Helpers import progress
 import Config
 
-STEPS=100
+STEPS=1000
 
+"""
+gets a nx graph from a csv file
+"""
 def _getNxFromCSVFile(edgelist, vertexlist):
     """
     opens a CSV file and returns the directed and weighted graph
@@ -20,7 +23,10 @@ def _getNxFromCSVFile(edgelist, vertexlist):
         vlist.seek(0)
         return _getNxFromCSV(elist, lene, vlist, lenv)
     
-
+"""
+PRIVATE
+parses a CSV and returns a nx graph
+"""
 def _getNxFromCSV(edgelist, lene, vertexlist, lenv):
     """
     get a networkx graph from a csv list in memory with weights and timestamp
@@ -40,6 +46,9 @@ def _getNxFromCSV(edgelist, lene, vertexlist, lenv):
 
     return G
 
+"""
+get a nx graph from neo4j
+"""
 def getNxFromNeo4j():
     """
     get a networkx graph from a neo4j database
@@ -62,6 +71,10 @@ def getNxFromNeo4j():
             progress(i, len(G.edges()), steps=STEPS)
     return G
 
+
+"""
+push any nx graph to neo4j
+"""
 def pushNxToNeo4j(G):
     """
     push a networkx graph to neo4j
@@ -78,6 +91,10 @@ def pushNxToNeo4j(G):
             session.run("MATCH (n:Node {id: $id}), (m:Node {id: $id2}) MERGE (n)-[r:Edge {weight: $weight, timestamp: $timestamp}]->(m)", id=edge[0], id2=edge[1], weight=edge[2]["weight"], timestamp=edge[2]["timestamp"])
             progress(i, len(G.edges()), steps=STEPS)
 
+
+"""
+push a CSV in a nx graph and to neo4j
+"""
 if __name__ == "__main__":
     """
     load preprocessed file to neo4j
