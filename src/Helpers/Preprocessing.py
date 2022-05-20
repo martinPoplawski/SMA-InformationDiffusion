@@ -35,7 +35,7 @@ class Tweet:
 a holder class for adding tweets to a set with a custom add function
 """
 class Tweets:
-    tweets: set[Tweet]
+    tweets: set([Tweet])
     def __init__(self):
         self.tweets = set()
 
@@ -68,7 +68,7 @@ class Vertex:
 a holder class for adding vertices to a set with a custom add function
 """
 class Vertices:
-    vertices: set[Vertex]
+    vertices: set([Vertex])
     def __init__(self):
         self.vertices = set()
 
@@ -135,7 +135,7 @@ def generateVertexListFromTweets(tweets, filename):
 """
 reads in a csv and returns a set of tweets
 """
-def openFile(file) -> set[Tweet]:
+def openFile(file) -> set([Tweet]):
     tweets = set()
     with open(file) as file:
         reader = csv.reader(file)

@@ -1,5 +1,5 @@
 import networkx as nx 
-from networkx.algorithms.community import louvain_communities, louvain_partitions, girvan_newman, k_clique_communities, greedy_modularity_communities
+from networkx.algorithms.community import louvain_communities, louvain_partitions, girvan_newman, k_clique_communities, greedy_modularity_communities, k_clique_communities
 import random
 import community 
 
@@ -37,7 +37,8 @@ class Community:
        
         :return: List of communities  
         """
-        return greedy_modularity_communities(graph, n_communities=20)
+        print("started Greedy")
+        return greedy_modularity_communities(graph)
 
 
     #TODO
@@ -81,17 +82,17 @@ class Community:
                 edges = graph.get_edge_data(o,i)
                 for key in edges.keys():
                     if edges[key]['type'] == 'MT':
-                        inc += 2 
+                        inc += 1
                     elif edges[key]['type'] == 'RE':
                         inc += 1
                     elif edges[key]['type'] == 'RT': 
-                        inc += 3
+                        inc += 1
 
             for o, i in graph.out_edges(node):
                 edges = graph.get_edge_data(o,i)
                 for key in edges.keys():
                     if edges[key]['type'] == 'MT':
-                        out += 2 
+                        out += 2
                     elif edges[key]['type'] == 'RE':
                         out += 1
                     elif edges[key]['type'] == 'RT': 
@@ -101,11 +102,11 @@ class Community:
 
             # If there are no actions from a node, just randomly assign a high value.
             if inc+out == 0: 
-                threshholds[node] = random.randint(700,1000) / 1000
+                threshholds[node] = random.randint(600,1000) / 1000
             else: 
                 #TODO maybe take average into consideration from whole network. 
                 #Calculates random distribution with the activity of the user and a little randomness. 
-                threshholds[node] = random.randint(max(int(1000*(out/(inc + out)) - 300), 0), int(1000*(out/(inc+out))))/1000
+                threshholds[node] = random.randint(max(int(1000*(out/(inc + out)) - 400), 0), int(1000*(out/(inc+out))))/1000
 
 
         return threshholds 

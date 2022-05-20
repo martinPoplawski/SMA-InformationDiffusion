@@ -4,17 +4,8 @@ import math
 class InformationDiffusion:
     """Algorithm for whole project"""
     
+
     def ltm(graph, startingNodes):
-
-        """
-        Check which nodes are activated
-
-        :param graph: Graph for Algorithm
-        :param startingNodes: Nodes that are activated at the beginning
-       
-        :return: All nodes activated at each iteration step 
-        """
-
         i = 0
         A = startingNodes.copy()
         B = {}
@@ -29,12 +20,43 @@ class InformationDiffusion:
                 for out, inc in edges:
                     if out in A:
                         sum += graph.edges[out,inc]['weight']  
-
                 if sum > graph.nodes[node]["threshholds"]:
                     temp.add(node)
             A = temp.copy()
             steps.append(temp)
             i += 1
+        return steps
+
+    def ltmOne(graph, startingNodes):
+
+        """
+        Check which nodes are activated
+
+        :param graph: Graph for Algorithm
+        :param startingNodes: Nodes that are activated at the beginning
+       
+        :return: All nodes activated at each iteration step 
+        """
+
+        i = 0
+        A = startingNodes.copy()
+        B = {}
+        steps = []  
+        #while i == 0 or A != B:
+        B = A.copy()
+        temp = A.copy()
+        inactiveNodes = set(graph.nodes) - A
+        for node in inactiveNodes: 
+            edges = graph.in_edges(node)
+            sum = 0
+            for out, inc in edges:
+                if out in A:
+                    sum += graph.edges[out,inc]['weight']  
+            if sum > graph.nodes[node]["threshholds"]:
+                temp.add(node)
+        A = temp.copy()
+        steps.append(temp)
+        i += 1
         return steps
 
  
@@ -71,7 +93,6 @@ class InformationDiffusion:
         bestNode = 0
         oldValue = math.inf
         while i < budget:
-
             for node in graph.nodes():
                 Stemp = S.copy()
                 Stemp.add(node)
@@ -85,6 +106,7 @@ class InformationDiffusion:
             S.add(bestNode)
             oldValue = bestValue
             i += 1
+            print(f"{i}/{budget}")
         return S
 
 
@@ -110,20 +132,44 @@ class InformationDiffusion:
 
 
     #TODO find cost and gain function 
-    def maxCascCostAndGain(graph, budget=3, cost=10, gain=0.5):
+    def maxCascCostAndGain(graph, cost=10, gain=0.5):
         i = 0
         S = set()
-        bestSet = math.inf
+        oldSet = 0
+        bestSet = 0
         bestNode = 0
-        while i < budget:
+        while (bestSet - oldSet) * gain > cost or i == 0:
+            oldSet = bestSet
             for node in graph.nodes():
                 Stemp = S.copy()
                 Stemp.add(node)
-                value = InformationDiffusion.loss(graph, InformationDiffusion.ltm(graph, Stemp))
-                if value < bestSet: 
+                value = len(InformationDiffusion.ltm(graph, Stemp)[-1])
+                if value > bestSet: 
                     bestNode = node
                     bestSet = value
             S.add(bestNode)
+            i += 1
+
+        return S
+
+    def maxCascPercentage(graph, percentage=0.9):
+        i = 0
+        S = set()
+
+        totalNodes = len(graph.nodes())
+        bestSet = 0
+        bestNode = 0
+        while (bestSet/totalNodes) < percentage:
+            for node in graph.nodes():
+                Stemp = S.copy()
+                Stemp.add(node)
+                value = len(InformationDiffusion.ltm(graph, Stemp)[-1])
+                if value > bestSet: 
+                    bestNode = node
+                    bestSet = value
+            
+            S.add(bestNode)
+            print(f"Iter[{i}]/ Set[{bestSet}]")
             i += 1
 
         return S
