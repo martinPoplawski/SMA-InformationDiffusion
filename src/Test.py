@@ -1,7 +1,11 @@
+from venv import create
+from warnings import catch_warnings
 import networkx as nx 
 import matplotlib.pyplot as plt
+from numpy import short
 from Helpers.Community import Community
 from Helpers.InformationDiffusion import InformationDiffusion
+from Helpers.Visualization import Visualization
 import random
 
 #Starting values
@@ -14,8 +18,11 @@ gain = 0.5
 
 
 #Necessary Variables
+#whole graph
 G = None
 
+#sampled Graph
+shortenedG = None
 
 #End Products
 
@@ -33,6 +40,8 @@ steps = None
 stepsCostGain = None
 stepsPerc = None
 
+#number of communities
+nbCommunities = 0
 
 ##########################
 
@@ -48,9 +57,10 @@ def graphPrep():
 
     global G
     global cliq
+    global shortenedG
 
     # DANA Change the Comm number to bigger to have a smaller community for testing and change it to smaller for bigger communities. 
-    G = nx.read_edgelist('data/Comms/higgs-Comm-11.edgelist', nodetype=int, create_using=nx.DiGraph())
+    G = nx.read_edgelist('data/Comms/higgs-Comm-22.edgelist', nodetype=int, create_using=nx.DiGraph())
 
     #TODO find sigmoid function to convert to [0,1]
     for edge in G.edges():
@@ -69,11 +79,13 @@ def graphPrep():
     
     cliq = G
     nx.set_node_attributes(cliq, threshholds, "threshholds")
+    shortenedG = nx.read_edgelist('data/sampled-graph.edgelist', nodetype=int, create_using=nx.DiGraph())
+
 
 
 def preOnce():
 
-    Data = open('data/preprocessed_1653041656.csv', "r")
+    Data = open('data/preprocessed_1653225603.csv', "r")
     Graphtype = nx.DiGraph()
 
     print("importing Graph...")
@@ -85,11 +97,14 @@ def preOnce():
         edges = G.get_edge_data(edge[0],edge[1])
         G.edges[edge[0], edge[1]]['weight'] = edges['weight']
 
+    nx.write_edgelist(G, 'data/whole-graph.edgelist')
+
     print("Starting shortening")
-    k = 20000
+    k = 10000
     sampled_nodes = random.sample(G.nodes, k)
     sampled_graph = G.subgraph(sampled_nodes)
     print(sampled_graph)
+    nx.write_edgelist(sampled_graph, 'data/sampled-graph.edgelist')
 
     #TODO create all Communities as edgelists for faster execution
     communities = Community.getAllComm(sampled_graph)
@@ -114,13 +129,20 @@ def calculateBestCost():
     global bestStartingNodes
     global bestStartingNodesCostGain
     global bestStartingNodesPerc
+    global steps
+    global stepsCostGain
+    global stepsPerc
 
     print("Start Calculation")
     
     bestStartingNodes = InformationDiffusion.maxCasc(cliq)
     bestStartingNodesCostGain = InformationDiffusion.maxCascCostAndGain(cliq, cost=cost, gain=gain)
     bestStartingNodesPerc = InformationDiffusion.maxCascPercentage(cliq, percentage=0.9)
+    steps=InformationDiffusion.ltm(cliq,bestStartingNodes)
+    stepsCostGain = InformationDiffusion.ltm(cliq,bestStartingNodesCostGain)
+    stepsPerc = InformationDiffusion.ltm(cliq,bestStartingNodesPerc)
 
+    print("how many steps: ",len(steps),len(stepsCostGain),len(stepsPerc))
 
     print("==================================")
     for name, startingNodes in zip(["Loss", "Cost and Gain", "Percentage"],[bestStartingNodes, bestStartingNodesCostGain, bestStartingNodesPerc]):
@@ -153,6 +175,53 @@ def visualize():
     nx.draw(cliq, node_color=color_map)
     plt.show()
 
+def visualize2():
+    global cliq
+    global shortenedG
+    global stepsPerc
+    
+    print("--------------VISUALIZATION--------------")
+
+    comm_array=createCommunityArray()
+
+    #print(len(cliq))
+    
+    #TODO: Visualization.edges_weights(cliq)
+    #Visualization.neighbors_nodes(cliq)
+    #Visualization.communities(cliq)
+    #Visualization.spreading(cliq,stepsPerc)
+    #Visualization.nbOfStepsToCover(cliq,steps)
+    #Visualization.allCommunitiesInGraph(shortenedG,comm_array)
+
+    #for x in range(0,20):
+     #   for y in range(0,20):
+      #      if(x!=y):
+       #         print(x,y)
+        #        comm1 = nx.read_edgelist('data/Comms/higgs-Comm-'+str(x)+'.edgelist', nodetype=int, create_using=nx.DiGraph())
+         #       comm2 = nx.read_edgelist('data/Comms/higgs-Comm-'+str(y)+'.edgelist', nodetype=int, create_using=nx.DiGraph())    
+          #      Visualization.compareTwoCommunities(comm1,comm2,wholeG)
+
+    
+    
+    
+
+
+def createCommunityArray():
+    x=0
+    comm_array=[]
+    while(True):
+        try:
+            comm = nx.read_edgelist('data/Comms/higgs-Comm-'+str(x)+'.edgelist', nodetype=int, create_using=nx.DiGraph())
+            comm_array.append(comm)
+            x=x+1
+        except:
+            break
+    #print("Nb of communities: ",len(comm_array))
+    return comm_array
+        
+
+
+
 
 if __name__ == "__main__":
     #Uncomment to generate edgelists for smaller subset and faster testing times. 
@@ -163,10 +232,11 @@ if __name__ == "__main__":
 
     #This should work but not with combined graphs
     graphPrep()
-
     #Still under testing. 
     #graphPrepMarco()
-    print(G)
+    #print("G",G)
+    #print("cliq",cliq)
     calculateBestCost()
-    visualize()
+    #visualize()
+    visualize2()
     pass
