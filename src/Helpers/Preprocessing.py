@@ -110,18 +110,15 @@ def combineFiles():
                 data.writerow([tweet.person1, tweet.person2, tweet.weight, tweet.timestamp])
                 progress(i, len(tweets.tweets), steps=1000)       
 
-        generateVertexListFromTweets(tweets.tweets, filename) 
+        vertices = generateVertexListFromTweets(tweets.tweets)
+        exportVertexList(vertices, filename) 
     return filename   
 
+
 """
-generates a vertexlist from a set of tweets and stores them in a csv
+exports a Vertices object to a CSV file with _vertexlist ending
 """
-def generateVertexListFromTweets(tweets, filename):
-    vertices = Vertices()
-    for i, tweet in enumerate(tweets):                
-        vertices.add(Vertex(tweet.person1, 1))
-        vertices.add(Vertex(tweet.person2, 1))
-        progress(i, len(tweets), steps=1000)
+def exportVertexList(vertices, filename):
     #store vertices in csv
     with open(f"data/{filename}_vertexlist.csv", "w", newline="") as file:
         data = csv.writer(file)        
@@ -129,7 +126,32 @@ def generateVertexListFromTweets(tweets, filename):
         print(f"writing vertexlist to {filename}_vertexlist.csv")
         for i, vertex in enumerate(vertices.vertices):
             data.writerow([vertex.id, vertex.weight])
-            progress(i, len(vertices.vertices), steps=1000)
+            progress(i, len(vertices.vertices), steps=1000)    
+
+"""
+generates a Vertices object from an edgelist
+NEEDS FULL FILE PATH
+"""
+def generateVertexListFromEdgelist(filename):
+    vertices = Vertices()
+    with open(filename) as file:
+        reader = csv.reader(file)
+        for edge in reader:
+            vertices.add(Vertex(edge[0], 1))
+            vertices.add(Vertex(edge[1], 1))
+    return vertices
+
+"""
+generates a vertexlist from a set of tweets and stores them in a csv
+"""
+def generateVertexListFromTweets(tweets):
+    vertices = Vertices()
+    for i, tweet in enumerate(tweets):                
+        vertices.add(Vertex(tweet.person1, 1))
+        vertices.add(Vertex(tweet.person2, 1))
+        progress(i, len(tweets), steps=1000)
+    return vertices
+    
 
 
 """
