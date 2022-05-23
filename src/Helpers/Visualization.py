@@ -1,0 +1,261 @@
+from cmath import inf
+from re import S, sub
+from telnetlib import theNULL
+import matplotlib.pyplot as plt
+import numpy as np
+
+#TODO: do we use it?
+##pip install igraph: this is for python 
+
+class Visualization:
+
+    # Shows the distribution of weights in edges
+
+    def edges_weights(graph):
+        #TODO: looks weird but dont know why
+        edge_sequence = sorted((d[2]['weight'] for d  in graph.edges.data()), reverse=True)
+        print(edge_sequence)
+
+        #get the maximum edge weight
+        emax = max(edge_sequence)
+        print("Edge weight maximum: ",emax)   
+
+        #use a bar plot to show results
+        plt.title("Distribution of edge weights")
+        plt.xlabel("Edge weight")
+        plt.ylabel("number of edges")
+        print(*np.unique(edge_sequence, return_counts=True))
+        plt.bar(*np.unique(edge_sequence, return_counts=True))
+        plt.show()
+
+    
+    #Show the distribution of number of neighbours nodes have
+
+    def neighbors_nodes(graph):
+
+        degree_sequence = sorted((d for n, d in graph.degree()), reverse=True)
+        print(degree_sequence)
+
+        #get maximum degree (nb of neighbours)
+        dmax = max(degree_sequence)
+        print("Maximal degree of nodes: ",dmax)
+        
+        #bar plot
+        plt.title("Number of nodes with a specific degree")
+        plt.xlabel("Degree")
+        plt.ylabel("Number of nodes")
+        print(*np.unique(degree_sequence, return_counts=True))
+        plt.bar(*np.unique(degree_sequence, return_counts=True))
+        plt.show()
+
+
+    #Create file for gephi: one community as a graph
+
+    def community(graph):
+    
+        nx.write_gexf(graph, "data/visualization/community.gexf", version="1.2draft")
+    
+
+    #Create file for gephi: one community in whole graph
+    def oneCommunityInGraph(graph, comm):
+        nx.set_node_attributes(graph, 0, name="in_community")
+
+        for node in graph.nodes():
+            for member in comm:
+                if(node==member):
+                    graph.nodes[node]["in_community"]=1
+        nx.write_gexf(graph, "data/visualization/oneCommunityInG.gexf", version="1.2draft")
+
+    #Create file for gephi: all communities in graph colored
+    def allCommunitiesInGraph(graph, array_of_comm):
+
+        print(len(array_of_comm))
+        
+        nx.set_node_attributes(graph, 0, name="community")
+
+        for x in range(0,len(array_of_comm)):
+            print("round",x,"of",len(array_of_comm))
+            for member in array_of_comm[x]:
+                for node in graph.nodes():
+                    if node==member:
+                        graph.nodes[node]["community"]=x
+        
+        print(graph)
+        nx.write_gexf(graph, "data/visualization/allCommunitiesGraph.gexf", version="1.2draft")
+
+
+    def spreading(graph, infected):
+        #show each step which node infected, recovered etc.
+        #in gephi
+
+        print("infected",infected)
+
+        for x in range(0,len(infected)):
+            print("x",x)
+            nx.set_node_attributes(graph, 0, name="infected")
+            for node in graph.nodes():
+                for infected_node in infected[x]:
+                    if(infected_node==node):
+                        graph.nodes[node]["infected"]=1
+
+            nx.write_gexf(graph, "data/visualization/spreading"+ str(x) +".gexf", version="1.2draft")
+
+        print("")    
+
+
+    def nbOfStepsToCover(graph, steps):
+
+        print(steps)
+        graph_size = graph.number_of_nodes()
+        print(graph_size)
+
+        percentage_list = [0] * (len(steps))
+        index=0
+        index_list=[]
+        for step in steps:
+            percentage_list[index] = len(step)/graph_size*100
+            index = index+1
+            index_list.append(str(index))
+
+        print(percentage_list)
+
+        x = index_list
+        y = percentage_list #how many nodes in a community
+
+        print(index_list,percentage_list)
+        plt.title("Percentage of infected per step")
+        plt.xlabel("Step")
+        plt.ylabel("Percentage")
+
+        plt.plot(x,y)
+        plt.show()
+
+        #TODO: ask martin when algo stops counting steps
+        print("took",len(steps),"steps to inform 90% of people etc.")
+
+    def nodesInCommunities(array_of_subgraphs): #better to show ranges like how many communities have 0-1000 members, how many have +10'000 etc.
+        
+        for subgraph in array_of_subgraphs:
+            subgraph.number_of_nodes
+        x = np.array([str(i)for i in range(1,5)]) #
+        y = np.array([30000, 800000, 1000, 10]) #how many nodes in a community
+        plt.title("NbOfCommunitiesWith X nodes")
+        plt.xlabel("Number of nodes")
+        plt.ylabel("Number of communities")
+
+        plt.bar(x,y)
+        plt.show()
+
+    def getEdgeWithHighestWeight():
+        #just calc with the function on top
+        print("")
+
+    def getNodeWhichCanInfectMost():
+        print("")
+
+    def nodesInfected():
+        x = np.array([str(i)for i in range(1,5)])
+        y = np.array([3, 8, 1, 10])
+        plt.title("Infected how many nodes")
+        plt.xlabel("Infected nodes")
+        plt.ylabel("Number of nodes infecting")
+
+        plt.bar(x,y)
+        plt.show()
+
+
+    #compare where two communities are connected, which nodes
+    def compareTwoCommunities(comm1, comm2, wholeGraph):
+        #print(comm1.nodes(),comm2.nodes())
+        sameNodes=[]
+        connections=[]
+        for node in comm1.nodes():
+            for node2 in comm2.nodes():
+                #sharing nodes                    
+                #print(node,node2)
+
+                if node==node2:
+                    sameNodes.append(node)
+
+                #nodes being connected with each other
+                if wholeGraph.has_edge(node,node2):
+                    connections.append([node,node2])
+        
+        print(sameNodes, len(sameNodes))
+        print(connections,len(connections))
+        
+
+
+
+    def centrality(graph):
+        degree_cent=nx.degree_centrality(graph)
+        closeness_cent=nx.closeness_centrality(graph)
+        eigenvector_cent=nx.eigenvector_centrality(graph)
+        print("degree centrality ",degree_cent)
+        print("closeness centrality ",closeness_cent)
+        print("eigenvector centrality",eigenvector_cent)
+
+        print("top 10", Visualization.top_keys(degree_cent,10))
+
+    def top_keys(dictionary, top):
+        top=2
+        print(dictionary)
+        items= dictionary.items()
+        #items.sort(reverse=True, key=lambda x: x[1])
+        sorted(items)
+        print(items)
+        return map(lambda x: x[0], items[:top])
+
+
+    def similarity(graph):
+        #https://networkx.org/documentation/stable/reference/algorithms/link_prediction.html
+        #TODO: vergleiche 2 nodes
+        print("jaccard sim",nx.jaccard_coefficient(graph))
+
+
+
+#creating some nx graph to test:
+
+import networkx as nx
+
+steps = [[1],[1,2],[1,2,3]]
+
+graph=nx.Graph()
+graph.add_node(1)
+graph.add_node(2)
+graph.add_node(3)
+graph.add_node(4)
+
+graph.add_edge(1,2,weight=10)
+graph.add_edge(1,3,weight=5)
+graph.add_edge(1,4,weight=10)
+graph.add_edge(2,4,weight=10)
+
+
+#TEST Compare Two communities ----------------------------------
+graph1=nx.Graph()
+graph1.add_node(1)
+graph1.add_node(2)
+
+graph1.add_edge(1,2,weight=10)
+
+graph2=nx.Graph()
+graph2.add_node(1)
+graph2.add_node(4)
+
+graph2.add_edge(1,4,weight=10)
+#Visualization.compareTwoCommunities(graph1,graph2,graph) #test done and works fine
+#------------------------------------------------------------------
+
+#TEST
+
+#Visualization.edges_weights(graph)
+#Visualization.neighbors_nodes(graph)
+#communities()
+#spreading()
+#nbOfStepsToCover(graph,steps)
+#nodesInCommunities()
+#getNodeWithHighestWeight()
+#getNodeWhichInfectedMost()
+#nodesInfected()
+#Visualization.centrality(graph)
