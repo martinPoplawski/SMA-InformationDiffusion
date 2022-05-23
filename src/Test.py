@@ -7,6 +7,7 @@ from Helpers.Community import Community
 from Helpers.InformationDiffusion import InformationDiffusion
 from Helpers.Visualization import Visualization
 import random
+import time
 
 #Starting values
 
@@ -33,8 +34,10 @@ cliq = None
 #DANA some more variables for 3 different kinds of algorithms and Verfärbungen 
 #Best starting nodes for Information Diffusion (list)
 bestStartingNodes = None
+bestStartingNOdesOneIter = None
 bestStartingNodesCostGain = None
 bestStartingNodesPerc = None
+
 #Steps for the InformationDiffusion (A list at each index a set of infected nodes)
 steps = None
 stepsCostGain = None
@@ -84,6 +87,9 @@ def graphPrep():
 
 
 def preOnce():
+    """
+    Calculate all Communities of the graph      
+    """
 
     Data = open('data/preprocessed_1653225603.csv', "r")
     Graphtype = nx.DiGraph()
@@ -97,10 +103,9 @@ def preOnce():
         edges = G.get_edge_data(edge[0],edge[1])
         G.edges[edge[0], edge[1]]['weight'] = edges['weight']
 
-    nx.write_edgelist(G, 'data/whole-graph.edgelist')
-
+    startTime = time.time()
     print("Starting shortening")
-    k = 10000
+    k = 100000
     sampled_nodes = random.sample(G.nodes, k)
     sampled_graph = G.subgraph(sampled_nodes)
     print(sampled_graph)
@@ -109,6 +114,9 @@ def preOnce():
     #TODO create all Communities as edgelists for faster execution
     communities = Community.getAllComm(sampled_graph)
     print("Finished all Comms")
+
+    executionTime = (time.time() - startTime)
+    print('Execution time in seconds: ' + str(executionTime / 60))
 
     counter = 0
     for c, v_c in enumerate(communities):
@@ -123,9 +131,10 @@ def preOnce():
 ########################   COST    ###############################################
     
             
-def calculateBestCost():
+def calculateStartingNodes():
 
     global cliq
+    global bestStartingNOdesOneIter 
     global bestStartingNodes
     global bestStartingNodesCostGain
     global bestStartingNodesPerc
@@ -136,6 +145,7 @@ def calculateBestCost():
     print("Start Calculation")
     
     bestStartingNodes = InformationDiffusion.maxCasc(cliq)
+    bestStartingNodesOneIter = InformationDiffusion.maxCascOne(cliq)
     bestStartingNodesCostGain = InformationDiffusion.maxCascCostAndGain(cliq, cost=cost, gain=gain)
     bestStartingNodesPerc = InformationDiffusion.maxCascPercentage(cliq, percentage=0.9)
     steps=InformationDiffusion.ltm(cliq,bestStartingNodes)
@@ -145,7 +155,7 @@ def calculateBestCost():
     print("how many steps: ",len(steps),len(stepsCostGain),len(stepsPerc))
 
     print("==================================")
-    for name, startingNodes in zip(["Loss", "Cost and Gain", "Percentage"],[bestStartingNodes, bestStartingNodesCostGain, bestStartingNodesPerc]):
+    for name, startingNodes in zip(["Loss", "Loss: One Iteration", "Cost and Gain", "Percentage"],[bestStartingNodes, bestStartingNodesOneIter, bestStartingNodesCostGain, bestStartingNodesPerc]):
         nodes = InformationDiffusion.ltm(cliq, startingNodes)
         coveredNodes = nodes[len(nodes) - 1]
         print(name)
@@ -229,14 +239,16 @@ if __name__ == "__main__":
     #preOnce()
     #preOnceMarco()
 
+    #10k = 8.7 sek
+    #30k = 5 min
+    #100k = 263 min = 4h 23
+
 
     #This should work but not with combined graphs
     graphPrep()
     #Still under testing. 
     #graphPrepMarco()
-    #print("G",G)
-    #print("cliq",cliq)
-    calculateBestCost()
-    #visualize()
+    print(G)
+    calculateStartingNodes()
     visualize2()
     pass
