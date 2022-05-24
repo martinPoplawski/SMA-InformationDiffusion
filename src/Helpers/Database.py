@@ -6,16 +6,24 @@ import networkx as nx
 from neo4j import GraphDatabase
 from Helpers import progress
 import Config
+from Preprocessing import generateVertexListFromEdgelist, Vertices, exportVertexList
 
 STEPS=1000
 
 """
 gets a nx graph from a csv file
+NEEDS FULL EDGELIST [AND VERTEXLIST] PATH
 """
-def _getNxFromCSVFile(edgelist, vertexlist):
+def _getNxFromCSVFile(edgelist, vertexlist = None):
     """
     opens a CSV file and returns the directed and weighted graph
     """
+    #generate vertexlist if not given
+    if vertexlist == None:
+        vertices = generateVertexListFromEdgelist(edgelist)
+        exportVertexList(vertices, edgelist)
+        vertexlist = f"{edgelist}_vertexlist.csv"
+
     with open(edgelist, 'r') as elist, open(vertexlist, 'r') as vlist:
         lene = len(elist.readlines())
         lenv = len(vlist.readlines())
@@ -93,7 +101,7 @@ def pushNxToNeo4j(G):
         lenEdges = len(G.edges())
         for i, edge in enumerate(G.edges(data=True)):
             session.run("MATCH (n:Node {id: $id}), (m:Node {id: $id2}) MERGE (n)-[r:Edge {weight: $weight, timestamp: $timestamp}]->(m)", id=edge[0], id2=edge[1], weight=edge[2]["weight"], timestamp=edge[2]["timestamp"])
-            progress(i, lenEdges, steps=STEPS)
+            progress(i, lenEdges) #no stepping, because slow process
 
 
 """
@@ -105,5 +113,5 @@ if __name__ == "__main__":
     """
     Config.verbose = True        
     filename = "preprocessed_1652971137"
-    G = _getNxFromCSVFile(f"src/data/{filename}.csv", f"src/data/{filename}_vertexlist.csv")
+    G = _getNxFromCSVFile(filename, f"{filename}_vertexlist")
     pushNxToNeo4j(G)    
