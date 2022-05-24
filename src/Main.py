@@ -1,7 +1,7 @@
 import sys
 sys.path.insert(0, 'Helpers')
 from Preprocessing import combineFiles
-from Config import verbose
+import Config
 from Database import _getNxFromCSVFile, pushNxToNeo4j
 import networkx as nx
 import InformationDiffusion
@@ -14,6 +14,8 @@ desc = {"-loadAll": "loads the higgs activity and social graph into neo4j",
         "-optimization": "optimization [opt] | -o [opt]\n\t\t\t\tchoose from Loss | Lossfast | CostAndGain | Percentage (case insensitive)"}
 
 G = nx.DiGraph()
+S = set()
+
 
 def loadAllDataIntoNeo4j():
     filename = combineFiles()
@@ -121,9 +123,13 @@ def main():
     if args["-optimization"] != 0 and args["-optimization"] in ["loss", "lossfast", "costandgain", "percentage"]:   
         otype = args["-optimization"]
         if otype == "costandgain":
-            S = InformationDiffusion.cascCostAndGain(G)
+            S = InformationDiffusion.maxCascCostAndGain(G)
         elif otype == "percentage":
-            S = InformationDiffusion.cascPercentage(G)    
+            S = InformationDiffusion.maxCascPercentage(G) 
+        elif otype == "loss":
+            S = InformationDiffusion.maxCasc(G)
+        elif otype == "lossfast":
+            S = InformationDiffusion.maxCascOne(G)
 
 
 
