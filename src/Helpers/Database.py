@@ -5,7 +5,7 @@ store weights with nx.set_node_attributes
 import networkx as nx
 from neo4j import GraphDatabase
 from Helpers import progress
-import Config
+import Config as Config
 from Preprocessing import generateVertexListFromEdgelist, Vertices, exportVertexList
 
 STEPS=1000
@@ -49,10 +49,12 @@ def _getNxFromCSV(edgelist, lene, vertexlist, lenv):
     print("Getting edges")    
     for i, line in enumerate(edgelist):
         line = line.strip().split(',')
-        G.add_edge(line[0], line[1], weight=int(line[2]), timestamp=int(line[3]))
+        G.add_edge(line[0], line[1], weight=line[2], timestamp=int(line[3]))
         progress(i, lene, steps=STEPS)        
 
     return G
+
+    
 
 """
 get a nx graph from neo4j

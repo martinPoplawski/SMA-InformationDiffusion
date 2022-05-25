@@ -1,7 +1,7 @@
 import math 
 from concurrent.futures import ThreadPoolExecutor
 from threading import Condition
-
+from Helpers import progress
 import time
 
 
@@ -36,7 +36,7 @@ class InformationDiffusion:
                 sum = 0
                 for out, inc in edges:
                     if out in A:
-                        sum += graph.edges[out,inc]['weight']  
+                        sum += float(graph.edges[out,inc]['weight'])
                 if sum > graph.nodes[node]["threshholds"]:
                     temp.add(node)
             
@@ -47,7 +47,7 @@ class InformationDiffusion:
 
 
     #TODO Test if accuracy with one step is similar to all steps
-    def ltmOne(graph, startingNodes):
+    def __ltmOne(graph, startingNodes):
 
         """
         Check which nodes are activated at next time step
@@ -71,14 +71,14 @@ class InformationDiffusion:
             sum = 0
             for out, inc in edges:
                 if out in A:
-                    sum += graph.edges[out,inc]['weight']  
+                    sum += float(graph.edges[out,inc]['weight'])
             if sum > graph.nodes[node]["threshholds"]:
                 temp.add(node)
         steps.append(temp)
         i += 1
         return steps
 
-    def partialCascLoss(graph, nodes, S, cond):
+    def __partialCascLoss(graph, nodes, S, cond):
         """
         Check for best node to add on given node Range based on smallest loss
 
@@ -96,7 +96,7 @@ class InformationDiffusion:
         for node in nodes:
             Stemp = S.copy()
             Stemp.add(node)
-            value = InformationDiffusion.loss(graph, InformationDiffusion.ltm(graph, Stemp)[-1])
+            value = InformationDiffusion.__loss(graph, InformationDiffusion.ltm(graph, Stemp)[-1])
             if value < bestValue: 
                 bestNode = node
                 bestValue = value
@@ -109,7 +109,7 @@ class InformationDiffusion:
         return [bestNode, bestValue]
 
     
-    def partialCascLen(graph, nodes, S, cond): 
+    def __partialCascLen(graph, nodes, S, cond): 
 
         """
         Check for best node to add on given node Range based on biggest final set
@@ -141,7 +141,7 @@ class InformationDiffusion:
 
 
     # TODO tweak the loss a little
-    def loss(graph, activated):
+    def __loss(graph, activated):
         """
         Loss of not activated people on the network based on their threshhold
         and incoming edges
@@ -154,7 +154,9 @@ class InformationDiffusion:
         inactive = set(graph.nodes()) - activated
         sum = 0
         for node in inactive: 
-            sum += (1 - graph.nodes[node]['threshholds']) * len(graph.in_edges(node))
+            #TODO loss function works not for cost 0
+            #sum += (1 - graph.nodes[node]['threshholds']) * len(graph.in_edges(node))
+            sum += len(graph.in_edges(node))
 
         return sum 
         
@@ -187,14 +189,16 @@ class InformationDiffusion:
         futures = [] 
         nodes = list(graph.nodes())
         cond = Condition()
-
+        print(f"InformationDiffusion starting nodes:")
         while i < budget:
-            
+
+            progress(i, budget, steps=1)
+
             #Creating Threads and distributing Work
             for j in range(threads):
                 beg = int(j*(len(nodes)/threads))
                 end = int((j + 1)*(len(nodes)/threads))
-                futures.append(executor.submit(InformationDiffusion.partialCascLoss,graph, nodes[beg:end], S, cond))
+                futures.append(executor.submit(InformationDiffusion.__partialCascLoss,graph, nodes[beg:end], S, cond))
             
             #Checking Futures
             for future in futures: 
@@ -219,7 +223,6 @@ class InformationDiffusion:
             oldValue = bestValue
             
             i += 1
-            print(f"{i}/{budget}")
 
         executionTime = (time.time() - startTime)
         print('Execution time in seconds: ' + str(executionTime))    
@@ -253,14 +256,14 @@ class InformationDiffusion:
         nodes = list(graph.nodes())
         cond = Condition()
 
-        while (bestSet - oldSet) * gain > cost or i == 0:
+        while (bestSet - oldSet) * gain > cost or i < 3:
             oldSet = bestSet
 
             #Creating Threads and distributing Work
             for j in range(threads):
                 beg = int(j*(len(nodes)/threads))
                 end = int((j + 1)*(len(nodes)/threads))
-                futures.append(executor.submit(InformationDiffusion.partialCascLen,graph, nodes[beg:end], S, cond))
+                futures.append(executor.submit(InformationDiffusion.__partialCascLen,graph, nodes[beg:end], S, cond))
 
             #Checking Futures
             for future in futures: 
@@ -272,6 +275,7 @@ class InformationDiffusion:
 
                 #Compare Results
                 result  = future.result()
+
                 if result[1] > bestSet: 
                     bestSet = result[1] 
                     bestNode = result[0]
@@ -308,13 +312,16 @@ class InformationDiffusion:
         nodes = list(graph.nodes())
         cond = Condition()
 
+        print(f"InformationDiffusion starting nodes:")
+
         while (bestSet/totalNodes) < percentage:
-            
+            progress(bestSet, int(totalNodes*percentage), steps=1)
+
             #Creating Threads and distributing Work
             for j in range(threads):
                 beg = int(j*(len(nodes)/threads))
                 end = int((j + 1)*(len(nodes)/threads))
-                futures.append(executor.submit(InformationDiffusion.partialCascLen,graph, nodes[beg:end], S, cond))
+                futures.append(executor.submit(InformationDiffusion.__partialCascLen,graph, nodes[beg:end], S, cond))
 
             #Checking Futures
             for future in futures: 
@@ -332,12 +339,9 @@ class InformationDiffusion:
                 cond.release()
             
             S.add(bestNode)
-            print(f"Iter[{i}]/ Set[{bestSet}]")
             i += 1
 
         return S
-
-
 
 
     def maxCascSingle(graph, budget=10, cost=5):
@@ -375,13 +379,13 @@ class InformationDiffusion:
             S.add(bestNode)
             oldValue = bestValue
             i += 1
-            print(f"{i}/{budget}")
         
         executionTime = (time.time() - startTime)
         print('Execution time in seconds: ' + str(executionTime))
         return S
 
-    def maxCascOne(graph, budget=10, cost=5):
+    #TODO create threads? 
+    def maxCascFast(graph, budget=10, cost=5):
         """
         Searching for best suitable nodes to start with
         Optimize in terms of error and loss function 
@@ -417,11 +421,15 @@ class InformationDiffusion:
         bestValue = math.inf
         bestNode = 0
         oldValue = math.inf
+        print(f"InformationDiffusion starting nodes:")
+
         while i < budget:
+            progress(i, budget, steps=1)
+
             for node in graph.nodes():
                 Stemp = S.copy()
                 Stemp.add(node)
-                value = InformationDiffusion.loss(graph, InformationDiffusion.ltmOne(graph, Stemp)[0])
+                value = InformationDiffusion.__loss(graph, InformationDiffusion.__ltmOne(graph, Stemp)[-1])
                 if value < bestValue: 
                     bestNode = node
                     bestValue = value
@@ -432,7 +440,6 @@ class InformationDiffusion:
             S.add(bestNode)
             oldValue = bestValue
             i += 1
-            print(f"{i}/{budget}")
         
         executionTime = (time.time() - startTime)
         print('Execution time in seconds: ' + str(executionTime))

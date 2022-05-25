@@ -1,13 +1,16 @@
 from venv import create
 from warnings import catch_warnings
+from xml.dom.expatbuilder import FILTER_ACCEPT
 import networkx as nx 
 import matplotlib.pyplot as plt
 from numpy import short
-from Helpers.Community import Community
+from Helpers.CommunitiesM import CommunitiesM as Community
 from Helpers.InformationDiffusion import InformationDiffusion
 from Helpers.Visualization import Visualization
 import random
 import time
+import os
+import csv
 
 #Starting values
 
@@ -48,7 +51,34 @@ nbCommunities = 0
 
 ##########################
 
-def graphPrep():
+def convertEdgelistToCSVCommunities(): 
+
+    _, _, files = next(os.walk("data/Comms"))
+    file_count = len(files)
+    print(file_count)
+
+    for i in range(file_count): 
+        G = nx.read_edgelist('data/Comms/higgs-Comm-' + str(i) + '.edgelist', nodetype=int, create_using=nx.DiGraph())
+        for edge in G.edges():
+            edges = G.get_edge_data(edge[0],edge[1])
+            if edges['weight'] == 1: 
+                G.edges[edge[0], edge[1]]['weight'] = random.randint(3,7)/10
+            elif edges['weight'] == 2: 
+                G.edges[edge[0], edge[1]]['weight'] = random.randint(5,9)/10
+
+        file = open(f"data/{'Comms/higgs-Comm-' + str(i)}.csv", "w", newline="")
+        data = csv.writer(file)
+
+        for edge in G.edges():
+            data.writerow([edge[0], edge[1], G.edges[edge[0], edge[1]]['weight'], 0])
+
+        print(f"{i}/{file_count}")
+
+
+    exit()
+
+
+def prepareGraph(graph):
     """
     Prepare and Import all the necessary graphs 
 
@@ -62,27 +92,28 @@ def graphPrep():
     global cliq
     global shortenedG
 
-    # DANA Change the Comm number to bigger to have a smaller community for testing and change it to smaller for bigger communities. 
-    G = nx.read_edgelist('data/Comms/higgs-Comm-22.edgelist', nodetype=int, create_using=nx.DiGraph())
+    # # DANA Change the Comm number to bigger to have a smaller community for testing and change it to smaller for bigger communities. 
+    # G = nx.read_edgelist('data/Comms/higgs-Comm-22.edgelist', nodetype=int, create_using=nx.DiGraph())
 
-    #TODO find sigmoid function to convert to [0,1]
-    for edge in G.edges():
-        edges = G.get_edge_data(edge[0],edge[1])
-        if edges['weight'] == 1: 
-            G.edges[edge[0], edge[1]]['weight'] = random.randint(3,7)/10
-        elif edges['weight'] == 2: 
-            G.edges[edge[0], edge[1]]['weight'] = random.randint(5,9)/10
+    # #TODO find sigmoid function to convert to [0,1]
+    # for edge in G.edges():
+    #     edges = G.get_edge_data(edge[0],edge[1])
+    #     if edges['weight'] == 1: 
+    #         G.edges[edge[0], edge[1]]['weight'] = random.randint(3,7)/10
+    #     elif edges['weight'] == 2: 
+    #         G.edges[edge[0], edge[1]]['weight'] = random.randint(5,9)/10
 
 
+    G = graph
     activity = nx.read_edgelist('data/higgs-activity_time.txt', nodetype=int, create_using= nx.MultiDiGraph(), data=[('time', int),('type',str)])
     activity = activity.subgraph(G.nodes())
-    nx.write_edgelist(activity, 'data/higgs-activity_time_shortened.edgelist')
+    #nx.write_edgelist(activity, 'data/higgs-activity_time_shortened.edgelist')
 
     threshholds = Community.calculateNodeThreshholdBasedIncOut(activity, G.nodes())
     
-    cliq = G
-    nx.set_node_attributes(cliq, threshholds, "threshholds")
-    shortenedG = nx.read_edgelist('data/sampled-graph.edgelist', nodetype=int, create_using=nx.DiGraph())
+    nx.set_node_attributes(G, threshholds, "threshholds")
+    #shortenedG = nx.read_edgelist('data/sampled-graph.edgelist', nodetype=int, create_using=nx.DiGraph())
+    return G
 
 
 
@@ -91,7 +122,7 @@ def preOnce():
     Calculate all Communities of the graph      
     """
 
-    Data = open('data/preprocessed_1653225603.csv', "r")
+    Data = open('data/preprocessed_1653041656.csv', "r")
     Graphtype = nx.DiGraph()
 
     print("importing Graph...")
@@ -118,11 +149,11 @@ def preOnce():
     executionTime = (time.time() - startTime)
     print('Execution time in seconds: ' + str(executionTime / 60))
 
-    counter = 0
-    for c, v_c in enumerate(communities):
-        if len(v_c) > 20: 
-            nx.write_edgelist(G.subgraph(v_c), 'data/Comms/higgs-Comm-' + str(counter) + '.edgelist')
-            counter += 1
+    # counter = 0
+    # for c, v_c in enumerate(communities):
+    #     if len(v_c) > 20: 
+    #         nx.write_edgelist(G.subgraph(v_c), 'data/Comms/higgs-Comm-' + str(counter) + '.edgelist')
+    #         counter += 1
 
     exit()
     
@@ -145,7 +176,7 @@ def calculateStartingNodes():
     print("Start Calculation")
     
     bestStartingNodes = InformationDiffusion.maxCasc(cliq)
-    bestStartingNodesOneIter = InformationDiffusion.maxCascOne(cliq)
+    bestStartingNodesOneIter = InformationDiffusion.maxCascFast(cliq)
     bestStartingNodesCostGain = InformationDiffusion.maxCascCostAndGain(cliq, cost=cost, gain=gain)
     bestStartingNodesPerc = InformationDiffusion.maxCascPercentage(cliq, percentage=0.9)
     steps=InformationDiffusion.ltm(cliq,bestStartingNodes)
@@ -169,20 +200,18 @@ def calculateStartingNodes():
 
 ############  Visualization  ############################
 
-def visualize():
+def visualize(graph, S):
 
-    global cliq
-    global bestStartingNodes
     color_map = []
-    for node in cliq.nodes():
+    for node in graph.nodes():
 
-        if node in bestStartingNodes:
+        if node in S:
             color_map.append('red')
         else: 
             color_map.append('green')
 
 
-    nx.draw(cliq, node_color=color_map)
+    nx.draw(graph, node_color=color_map)
     plt.show()
 
 def visualize2():
@@ -237,15 +266,16 @@ if __name__ == "__main__":
     #Uncomment to generate edgelists for smaller subset and faster testing times. 
     #DANA preOnce muss passiere damit de graph chli kürzt wird bevor du 6 Johr wartisch. 
     #preOnce()
-    #preOnceMarco()
 
     #10k = 8.7 sek
     #30k = 5 min
     #100k = 263 min = 4h 23
 
+    #convertEdgelistToCSVCommunities()
+
 
     #This should work but not with combined graphs
-    graphPrep()
+    prepareGraph(G)
     #Still under testing. 
     #graphPrepMarco()
     print(G)

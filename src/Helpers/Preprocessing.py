@@ -1,6 +1,6 @@
 import csv  
 import time
-import Config 
+import Config as Config
 from Helpers import print, progress
 
 
@@ -101,7 +101,7 @@ def combineFiles():
             tweets.add(Tweet(edge[0], edge[1]))                          
             progress(i, 14855841, steps=10000)                     
         
-        filename = f"preprocessed_{int(time.time())}"
+        filename = f"preprocessed_1652172596"
         with open(f"data/{filename}.csv", "w", newline="") as file:
             data = csv.writer(file)
             print(f"writing edgelist to csv {filename}.csv")
@@ -120,7 +120,8 @@ exports a Vertices object to a CSV file with _vertexlist ending
 """
 def exportVertexList(vertices, filename):
     #store vertices in csv
-    with open(f"data/{filename}_vertexlist.csv", "w", newline="") as file:
+    #with open(f"data/{filename}_vertexlist.csv", "w", newline="") as file:
+    with open(f"{filename}_vertexlist.csv", "w", newline="") as file:
         data = csv.writer(file)        
         #write vertices and their weights to csv
         print(f"writing vertexlist to {filename}_vertexlist.csv")

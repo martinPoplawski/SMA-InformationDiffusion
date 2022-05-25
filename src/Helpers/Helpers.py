@@ -1,4 +1,4 @@
-import Config
+import Config as Config
 from builtins import print as pp
 import shutil
 from time import sleep
