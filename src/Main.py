@@ -163,8 +163,7 @@ def main():
     if args["-community"] > 0:
         comminityNumber = args["-community"]
         G = _getNxFromCSVFile(f"data/Comms/higgs-Comm-{comminityNumber}.csv")
-        #TODO do it with Database
-        #pushNxToNeo4j(G)     
+        pushNxToNeo4j(G)     
 
     #if -optimization is given, run optimization
     if args["-optimization"] != 0 and args["-optimization"] in ["loss", "lossfast", "costandgain", "percentage"]:  
