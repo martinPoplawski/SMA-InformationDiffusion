@@ -2,27 +2,6 @@ from operator import sub
 import matplotlib.pyplot as plt
 import numpy as np
 
-#FUNCTIONS
-# edge_weights
-# neighbors_nodes
-# numberOfEdges
-# numberOfNodes
-# community: gephi
-# oneCommunityInGraph: gephi
-# allCommunitiesInGraph: gephi
-# spreading: gephi
-# nbOfStepsToCover
-# nodesInCommunities
-# getEdgeWithHighestWeight
-# getNodeWhichCanInfectMost
-# nodesInfected
-# compareTwoCommunities
-# centrality
-# top_keys
-# similarity
-# getNodesSeeingRetweet
-# contains
-
 
 
 class Visualization:
@@ -119,8 +98,7 @@ class Visualization:
     #----------------------------------------------------------------------------------
 
     def spreading(graph, infected):
-        #show each step which node infected, recovered etc.
-        #in gephi
+        #show each step which node infected (retweeted)
 
         print("infected",infected)
 
@@ -166,23 +144,23 @@ class Visualization:
 
     #----------------------------------------------------------------------------------
 
-    #TODO!!!!!
-    def nodesInCommunities(array_of_subgraphs): #better to show ranges like how many communities have 0-1000 members, how many have +10'000 etc.
+
+    def nodesEdgesInCommunities(array_of_subgraphs): #better to show ranges like how many communities have 0-1000 members, how many have +10'000 etc.
         nbOfEdges=[]
         nbOfNodes= []
-        nbOfDegrees
+
         for subgraph in array_of_subgraphs:
             nbOfNodes.append(subgraph.number_of_nodes())
             nbOfEdges.append(subgraph.number_of_edges())
 
-        #TODO----------
-        x = np.array([str(i)for i in range(1,5)]) #
-        y = np.array([30000, 800000, 1000, 10]) #how many nodes in a community
-        plt.title("NbOfCommunitiesWith X nodes")
-        plt.xlabel("Number of nodes")
-        plt.ylabel("Number of communities")
+      
+        print(nbOfNodes,nbOfEdges)
+        plt.title("Nodes and Edges in communities")
+        plt.xlabel("Number of Edges")
+        plt.ylabel("Number of Nodes")
 
-        plt.bar(x,y)
+        #if many have the same (x,y) the dot gets darker, so we can see which is more common. (many/little nodes, many/little edges)
+        plt.scatter(nbOfEdges,nbOfNodes,alpha=.1, s=200, color='red')
         plt.show()
 
     def getEdgeWithHighestWeight(graph):
@@ -194,18 +172,29 @@ class Visualization:
             print(key,val)
             
 
-#TODO:
-    def getNodeWhichCanInfectMost():
-        print("")
-#TODO
-    def nodesInfected():
-        x = np.array([str(i)for i in range(1,5)])
-        y = np.array([3, 8, 1, 10])
-        plt.title("Infected how many nodes")
-        plt.xlabel("Infected nodes")
-        plt.ylabel("Number of nodes infecting")
 
-        plt.bar(x,y)
+#TODO
+    def nodesInfected(graph,steps):
+        lastStep = steps[len(steps)-1]
+        print(lastStep)
+        nodesInfected = [0]*len(steps)
+        degrees = []
+        for index, activeNode in enumerate(lastStep):
+            degrees.append(graph.degree[activeNode])
+            print("degree of active node")
+            for neighbor in graph.neighbors(activeNode):
+                print("neighbor of activenode")
+                if Visualization.contains(neighbor, lastStep):
+                    nodesInfected[index]+=1
+        
+
+        x = degrees
+        y = nodesInfected
+        plt.title("nb of neighbors and neighbors infected")
+        plt.xlabel("degree")
+        plt.ylabel("nodes infected")
+
+        plt.scatter(x,y,alpha=0.2)
         plt.show()
 
 
@@ -222,35 +211,65 @@ class Visualization:
                 if node==node2:
                     sameNodes.append(node)
 
-                #nodes being connected with each other
+                #nodes being connected with each other (both directions possible because directional graph)
                 if wholeGraph.has_edge(node,node2):
                     connections.append([node,node2])
+                if wholeGraph.has_edge(node2,node):
+                    connections.append([node2,node])
+
         
-        print(sameNodes, len(sameNodes))
-        print(connections,len(connections))
+        print("shared nodes between communities:",sameNodes,"nb:", len(sameNodes))
+        print("edges between communities",connections,"nb:",len(connections))
         
 
 
-    #TODO
     def centrality(graph):
         degree_cent=nx.degree_centrality(graph)
         closeness_cent=nx.closeness_centrality(graph)
         eigenvector_cent=nx.eigenvector_centrality(graph)
-        print("degree centrality ",degree_cent)
-        print("closeness centrality ",closeness_cent)
-        print("eigenvector centrality",eigenvector_cent)
+        print("degree centrality ",degree_cent,"\n")
+        Visualization.top_keys(degree_cent,10)
+        print(f"================================")
+        print("closeness centrality ",closeness_cent,"\n")
+        Visualization.top_keys(closeness_cent,10)
+        print(f"================================")
+        print("eigenvector centrality",eigenvector_cent,"\n")
+        Visualization.top_keys(eigenvector_cent,10)
+        print(f"================================")
 
-        print("top 10", Visualization.top_keys(degree_cent,10))
 
-    #TODO
+
+    def centralityAllCommunities(array_comm):
+        centForComms = []
+        for comm in array_comm:
+            print("Community",comm)
+            degree_cent=nx.degree_centrality(comm)
+            closeness_cent=nx.closeness_centrality(comm)
+            eigenvector_cent=nx.eigenvector_centrality(comm)
+            print("degree centrality ",degree_cent)
+            print("closeness centrality ",closeness_cent)
+            print("eigenvector centrality",eigenvector_cent)
+            print(f"================================")
+
+
+            centForComms.append([degree_cent,closeness_cent,eigenvector_cent])
+
+        return centForComms
+        
+    
     def top_keys(dictionary, top):
-        top=2
-        print(dictionary)
-        items= dictionary.items()
-        #items.sort(reverse=True, key=lambda x: x[1])
-        sorted(items)
-        print(items)
-        return map(lambda x: x[0], items[:top])
+        from collections import Counter
+
+        k = Counter(dictionary)
+ 
+        # Finding 3 highest values
+        high = k.most_common(top)
+        
+        print("With max",top,"highest values")
+        print("Keys: Values")
+        
+        for i in high:
+            print(i[0]," :",i[1]," ")
 
     #TODO: vergleiche 2 nodes
     def similarity(graph):
@@ -290,7 +309,7 @@ class Visualization:
         #all neoghbours of activated nodes - activated nodes - doubles (x an y activated both let z see retweet)
 
     def contains(item,list):
-        print(item,list)
+        print("Is ",item,"in",list)
         for listitem in list:
             if(listitem==item):
                 return True
@@ -347,12 +366,14 @@ graph2.add_edge(1,4,weight=10)
 #Visualization.spreading(graph,steps)
 #Visualization.nbOfStepsToCover(graph,steps) #test ok
 
-#Visualization.nodesInCommunities()
+#Visualization.nodesEdgesInCommunities([graph,graph1,graph2]) #test ok
 #Visualization.getEdgeWithHighestWeight(graph)
 
-#Visualization.getNodeWhichInfectedMost()
-#Visualization.nodesInfected()
+#Visualization.nodesInfected(graph,steps) #test ok
 
-#Visualization.centrality(graph)
+#Visualization.compareTwoCommunities(graph1,graph2,graph) #test ok
 
-#Visualization.getNodesSeeingRetweet(graph,steps)
+#Visualization.centrality(graph) #test ok
+#Visualization.centralityAllCommunities([graph1,graph2, graph]) #test ok
+
+Visualization.getNodesSeeingRetweet(graph,steps)
