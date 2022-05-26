@@ -1,5 +1,8 @@
 import sys
+
+
 sys.path.insert(0, 'Helpers')
+from Visualization import Visualization
 from Preprocessing import combineFiles
 import Config as Config
 from Database import _getNxFromCSVFile, pushNxToNeo4j
@@ -9,7 +12,7 @@ from PostProcessing import prepareGraph
 from CommunitiesM import CommunitiesM as Community
 
 
-args = {"-loadAll": 0, "-noverbose": 0, "-help": 0, "-community": 0, "-optimization": 0, 'args': [], '-sample': 0}
+args = {"-loadAll": 0, "-noverbose": 0, "-help\t": 0, "-community": 0, "-optimization": 0, 'args': [], '-sample': 0, '-visualization':0}
 desc = {"-loadAll": "loads the higgs activity and social graph into neo4j",
         "-noverbose": "prevent too much output",
         "-help": "prints this help",
@@ -19,8 +22,8 @@ desc = {"-loadAll": "loads the higgs activity and social graph into neo4j",
         "args": "Loss - Stops once max Starting nodes or the improvement by adding nodes is too small \n \t\t\t\t -o loss [MaxNumberStartingNodes] [minLossImprovement] \n\
                 lossfast - Stops once max Starting nodes or the improvement by adding nodes is too small (only 1 iteration step in LTM) \n \t\t\t\t -o lossfast [MaxNumberStartingNodes] [minLossImprovement] \n\
                 costandgain - Stops once cost of adding node is bigger than gain of activating node \n \t\t\t\t -o costandgain [costOfAddingNodeToStartingSet] [GainOfActivatingNode] \n\
-                percentage - Stops once x-percent of people have seen the tweet \n \t\t\t\t -o percentage [percentToSeeTweet]"}
-
+                percentage - Stops once x-percent of people have seen the tweet \n \t\t\t\t -o percentage [percentToSeeTweet]",
+        "-visualization":"visualize findings, visualization [N], choose a community N"}
 
 #TODO complete description
 G = nx.DiGraph()
@@ -29,8 +32,8 @@ S = set()
 
 def loadAllDataIntoNeo4j():
     filename = combineFiles()
-    G = _getNxFromCSVFile(f"data/{filename}.csv", f"data/{filename}_vertexlist.csv")
-    pushNxToNeo4j(G)   
+    G = _getNxFromCSVFile(f"data/{filename}.csv", f"data/{filename}_vertexlist.csv")    
+    #pushNxToNeo4j(G)   
     
 def printHelp():
     helpstr = """Usage:
@@ -121,6 +124,24 @@ def main():
                     return
                 
 
+            #visualization parsing
+            if arg == "-visualization":
+                lastarg = arg
+                skipnext += 1                 
+                if len(sys.argv) <= i+1:
+                    print(f"expected argument after {lastarg}, got no more arguments instead")
+                    return
+                if argcheck(sys.argv[i+1], args):
+                    print(f"expected argument after {lastarg}, got {sys.argv[i+1]} instead")
+                    return
+                argument = 0
+                try:
+                    args[arg] = int(sys.argv[i+1]) 
+                except ValueError:
+                    print(f"expected argument in number format after {lastarg}, got {sys.argv[i+1]} instead")
+                    return
+                continue
+
 
             args[arg] = 1
         elif i>0:
@@ -142,6 +163,10 @@ def main():
 
     if args["-optimization"] != 0 and args["-optimization"] not in ["loss", "lossfast", "costandgain", "percentage"]:
         print("optimization must be one of: loss, lossfast, costandgain, percentage")
+        return
+    
+    if ("-visualization" in sys.argv) and args["-visualization"] == 0:
+        print("-visualization requires an argument")
         return
 
 
@@ -190,13 +215,65 @@ def main():
         print(f"Starting Nodes: {S}")
         print(f"================================")
 
-
-
         #S = StartingSet
         #G = Community
         #steps = steps
+
         #DANA stuff should be here to visualize depending on what you wanna do
         #visualize(G,S)
+        #communityNumber2=int(args['args'][0])
+
+    if args["-visualization"]:
+
+        wholeG = nx.read_edgelist('data/sampled-graph.edgelist', nodetype=int, create_using=nx.DiGraph())
+
+        print("whole G",wholeG)
+
+      
+        arg2 = args["-visualization"]
+        print("argument 2: ",arg2)
+       
+        arrayOfCommunities=createCommunityArray()
+        #communityNumber2=10
+        
+        Visualization.edges_weights(G) #test ok
+        Visualization.neighbors_nodes(G) #test ok
+        Visualization.numberOfEdges(G) #test ok
+        Visualization.numberOfNodes(G) #test ok
+
+        Visualization.community(G) #TODO:need to check
+        Visualization.oneCommunityInGraph(wholeG,G)
+        Visualization.allCommunitiesInGraph(wholeG,arrayOfCommunities)
+        Visualization.spreading(G,steps) #TODO: need to check
+
+        Visualization.nbOfStepsToCover(G,steps) #test ok
+        Visualization.nodesEdgesInCommunities(arrayOfCommunities) #test ok
+        Visualization.nodesInfected(G,steps) #test ok
+
+
+        G2 = _getNxFromCSVFile(f"data/Comms/higgs-Comm-{arg2}.csv")
+        Visualization.compareTwoCommunities(G,G2,wholeG) #TODO: need whole graph
+
+        Visualization.centrality(G,S) #test ok
+        #Visualization.centralityAllCommunities(arrayOfCommunities,10) #takes alot of time
+        Visualization.getNodesSeeingRetweet(G,steps) #test ok
+       
+
+def createCommunityArray():
+    x=0
+    comm_array=[]
+    while(True):
+        try:
+            comm = nx.read_edgelist('data/Comms/higgs-Comm-'+str(x)+'.edgelist', nodetype=int, create_using=nx.DiGraph())
+            comm_array.append(comm)
+            print(comm)
+            x=x+1
+        except:
+            break
+    #print("Nb of communities: ",len(comm_array))
+    print("nb of nodes communities: ",comm_array)
+    return comm_array
+
 
 
 
