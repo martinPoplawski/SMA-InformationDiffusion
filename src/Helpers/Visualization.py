@@ -132,12 +132,11 @@ class Visualization:
 
         print(f"============COMMUNITY SAVED TO ONECOMMUNITYING.GEXF====================")
 
-        nx.set_node_attributes(graph, 0, name="in_community")
+        nx.set_node_attributes(graph, -1, name="in_community")
 
         for node in graph.nodes():
             for member in comm:
-                #print(node,member)
-                if(node==member):
+                if(node==int(member)):
                     graph.nodes[node]["in_community"]=1
                     print("incomm")
         nx.write_gexf(graph, "data/visualization/oneCommunityInG.gexf", version="1.2draft")
@@ -155,18 +154,15 @@ class Visualization:
 
         print(f"============COMMUNITIES SAVED TO ALLCOMMUNITIESGRAPH.GEXF====================")
 
-        #print(len(array_of_comm))
         
         nx.set_node_attributes(graph, -1, name="community")
 
-        for x in range(0,len(array_of_comm)):
-            #print("round",x,"of",len(array_of_comm))
-            for member in array_of_comm[x]:
+        for index,comm in enumerate(array_of_comm):
+            for member in comm.nodes():
                 for node in graph.nodes():
-                    if node==member:
-                        graph.nodes[node]["community"]=x
+                    if node==int(member):
+                        graph.nodes[node]["community"]=index
         
-        #print(graph)
         nx.write_gexf(graph, "data/visualization/allCommunitiesGraph.gexf", version="1.2draft")
 
 
