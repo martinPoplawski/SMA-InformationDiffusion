@@ -10,7 +10,6 @@ import time
 class CommunitiesM:
     """Object for community detection and handling of similar"""
 
-    ##TODO check if communities are well formed with stuff from slides
     def getBiggestComm(graph):
         """
         Get the biggest community with Louvain
@@ -41,10 +40,6 @@ class CommunitiesM:
         print("started Greedy")
         return greedy_modularity_communities(graph)
 
-
-    #TODO
-    def saveCommunity(graph):
-        pass
 
     def splitGraphIntoCommunities(sample=10000):
         """

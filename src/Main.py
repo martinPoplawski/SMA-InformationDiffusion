@@ -9,13 +9,18 @@ from PostProcessing import prepareGraph
 from CommunitiesM import CommunitiesM as Community
 
 
-args = {"-loadAll": 0, "-noverbose": 0, "-help\t": 0, "-community": 0, "-optimization": 0, 'args': [], '-sample': 0}
+args = {"-loadAll": 0, "-noverbose": 0, "-help": 0, "-community": 0, "-optimization": 0, 'args': [], '-sample': 0}
 desc = {"-loadAll": "loads the higgs activity and social graph into neo4j",
         "-noverbose": "prevent too much output",
-        "-help\t": "prints this help",
-        "-sample": "samples the Graph and splits it into communities",
+        "-help": "prints this help",
+        "-sample": "samples the Graph and splits it into communities, needs a number as argument which decides the number of nodes in the sample",
         "-community" : "community [N] | -c [N]\n\t\t\t\tchoose the community N",
-        "-optimization": "optimization [opt] | -o [opt]\n\t\t\t\tchoose from Loss | Lossfast | CostAndGain | Percentage (case insensitive)"}
+        "-optimization": "optimization [opt] | -o [opt]\n\t\t\t\tchoose from Loss | Lossfast | CostAndGain | Percentage (case insensitive)", 
+        "args": "Loss - Stops once max Starting nodes or the improvement by adding nodes is too small \n \t\t\t\t -o loss [MaxNumberStartingNodes] [minLossImprovement] \n\
+                lossfast - Stops once max Starting nodes or the improvement by adding nodes is too small (only 1 iteration step in LTM) \n \t\t\t\t -o lossfast [MaxNumberStartingNodes] [minLossImprovement] \n\
+                costandgain - Stops once cost of adding node is bigger than gain of activating node \n \t\t\t\t -o costandgain [costOfAddingNodeToStartingSet] [GainOfActivatingNode] \n\
+                percentage - Stops once x-percent of people have seen the tweet \n \t\t\t\t -o percentage [percentToSeeTweet]"}
+
 
 #TODO complete description
 G = nx.DiGraph()
@@ -123,7 +128,7 @@ def main():
             return
         
     #if no arguments are given, print help
-    if len(sys.argv) == 1 or args["-help\t"]:
+    if len(sys.argv) == 1 or args["-help"]:
         printHelp()
         return
     

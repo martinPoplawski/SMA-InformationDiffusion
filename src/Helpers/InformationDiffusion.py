@@ -47,7 +47,6 @@ class InformationDiffusion:
         return steps
 
 
-    #TODO Test if accuracy with one step is similar to all steps
     def __ltmOne(graph, startingNodes):
 
         """
@@ -141,7 +140,6 @@ class InformationDiffusion:
         return [bestNode, bestSet]
 
 
-    # TODO tweak the loss a little
     def __loss(graph, activated):
         """
         Loss of not activated people on the network based on their threshhold
@@ -155,7 +153,6 @@ class InformationDiffusion:
         inactive = set(graph.nodes()) - activated
         sum = 0
         for node in inactive: 
-            #TODO loss function works not for cost 0
             #sum += (1 - graph.nodes[node]['threshholds']) * len(graph.in_edges(node))
             sum += len(graph.in_edges(node))
 
@@ -393,7 +390,6 @@ class InformationDiffusion:
         print('Execution time in seconds: ' + str(executionTime))
         return S
 
-    #TODO create threads? 
     def maxCascFast(graph, budget=10, cost=5):
         """
         Searching for best suitable nodes to start with

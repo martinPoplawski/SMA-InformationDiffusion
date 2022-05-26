@@ -69,7 +69,6 @@ def calculateNodeThreshholdBasedIncOut(graph, AllNodes):
         if inc+out == 0: 
             threshholds[node] = random.randint(600,1000) / 1000
         else: 
-            #TODO maybe take average into consideration from whole network. 
             #Calculates random distribution with the activity of the user and a little randomness. 
             threshholds[node] = random.randint(max(int(1000*(out/(inc + out)) - 400), 0), int(1000*(out/(inc+out))))/1000
 
