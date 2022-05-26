@@ -264,7 +264,7 @@ def createCommunityArray():
     comm_array=[]
     while(True):
         try:
-            comm = nx.read_edgelist('data/Comms/higgs-Comm-'+str(x)+'.edgelist', nodetype=int, create_using=nx.DiGraph())
+            comm = _getNxFromCSVFile('data/Comms/higgs-Comm-'+str(x)+'.csv')
             comm_array.append(comm)
             print(comm)
             x=x+1
