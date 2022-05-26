@@ -12,7 +12,7 @@ from PostProcessing import prepareGraph
 from CommunitiesM import CommunitiesM as Community
 
 
-args = {"-loadAll": 0, "-noverbose": 0, "-help\t": 0, "-community": 0, "-optimization": 0, 'args': [], '-sample': 0, '-visualization':0}
+args = {"-loadAll": 0, "-noverbose": 0, "-help": 0, "-community": 0, "-optimization": 0, 'args': [], '-sample': 0, '-visualization':0}
 desc = {"-loadAll": "loads the higgs activity and social graph into neo4j",
         "-noverbose": "prevent too much output",
         "-help": "prints this help",
