@@ -23,12 +23,12 @@ S = set()
 
 def loadAllDataIntoNeo4j():
     filename = combineFiles()
-    G = _getNxFromCSVFile(f"src/data/{filename}.csv", f"src/data/{filename}_vertexlist.csv")
+    G = _getNxFromCSVFile(f"data/{filename}.csv", f"data/{filename}_vertexlist.csv")
     pushNxToNeo4j(G)   
     
 def printHelp():
     helpstr = """Usage:
-python3 src/Main.py [options]
+cd src & python3 Main.py [options]
 Options:
 """
     for key in args:

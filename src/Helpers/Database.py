@@ -96,7 +96,7 @@ def pushNxToNeo4j(G):
         lenNodes = len(G.nodes())
         for i, node in enumerate(G.nodes(data=True)):
             session.run("MERGE (n:Node {id:$id, weight:$weight})", id=node[0], weight=node[1]["weight"])
-            progress(i, lenNodes, steps=STEPS)
+            progress(i, lenNodes)
 
         #push all edges with their weights and timestamp from Nx to neo4j
         print("Pushing edges")
