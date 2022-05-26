@@ -287,14 +287,11 @@ class Visualization:
                 #take each activated node of this step
                 for n in graph[activatedNode]:
                     #take each neighbour of activatedNode
-
-                        print(n, step)
                         
                         #see if neighbour is in activated nodes list
                         if (not Visualization.contains(n,step)):
                             #only add if not activated yet
                             array.append(n)
-                            print(index,array)
 
 
                 nodesSeeingRetweet[index]=np.concatenate((nodesSeeingRetweet[index],array))
@@ -305,11 +302,11 @@ class Visualization:
             #save nb of users who can see the retweet and aren't activated yet
             nodesSeeingRetweet[index]={"nodes":len(np.unique(nodesSeeingRetweet[index])),"percentage":len(np.unique(nodesSeeingRetweet[index]))/len(graph.nodes())}
 
-        print("Nodes seeing retweet at each step: ",nodesSeeingRetweet)
         #all neoghbours of activated nodes - activated nodes - doubles (x an y activated both let z see retweet)
+        return nodesSeeingRetweet
 
     def contains(item,list):
-        print("Is ",item,"in",list)
+        #print("Is ",item,"in",list)
         for listitem in list:
             if(listitem==item):
                 return True

@@ -1,5 +1,6 @@
 import networkx as nx 
 from networkx.algorithms.community import greedy_modularity_communities
+from Helpers import progress
 import random
 import csv
 import time
@@ -58,7 +59,7 @@ class CommunitiesM:
         G = nx.parse_edgelist(Data, delimiter=',', create_using=Graphtype,
                         nodetype=int, data=(('weight', float),('rand', float)))
 
-        print("Adding Weights to graph...")
+        print("Adding Weights to graph...") 
         for edge in G.edges():
             edges = G.get_edge_data(edge[0],edge[1])
             #TODO calculate better weight distribution
@@ -66,6 +67,7 @@ class CommunitiesM:
                 G.edges[edge[0], edge[1]]['weight'] = random.randint(3,7)/10
             elif edges['weight'] == 2: 
                 G.edges[edge[0], edge[1]]['weight'] = random.randint(5,9)/10
+
 
         startTime = time.time()
         sampled_nodes = random.sample(list(G.nodes), sample)

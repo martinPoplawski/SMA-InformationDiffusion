@@ -17,6 +17,7 @@ desc = {"-loadAll": "loads the higgs activity and social graph into neo4j",
         "-community" : "community [N] | -c [N]\n\t\t\t\tchoose the community N",
         "-optimization": "optimization [opt] | -o [opt]\n\t\t\t\tchoose from Loss | Lossfast | CostAndGain | Percentage (case insensitive)"}
 
+#TODO complete description
 G = nx.DiGraph()
 S = set()
 
@@ -149,7 +150,6 @@ def main():
     
     #if -sample is given, sample the graph and create communities
     if args["-sample"]: 
-        print(len(sys.argv))
         if len(sys.argv) < 3: 
             print("-sample requires an argument (int)")
         
@@ -163,7 +163,8 @@ def main():
     if args["-community"] > 0:
         comminityNumber = args["-community"]
         G = _getNxFromCSVFile(f"data/Comms/higgs-Comm-{comminityNumber}.csv")
-        pushNxToNeo4j(G)     
+        #TODO remove with DB
+        #pushNxToNeo4j(G)     
 
     #if -optimization is given, run optimization
     if args["-optimization"] != 0 and args["-optimization"] in ["loss", "lossfast", "costandgain", "percentage"]:  
@@ -184,11 +185,14 @@ def main():
         print(f"Starting Nodes: {S}")
         print(f"================================")
 
+
+
         #S = StartingSet
         #G = Community
         #steps = steps
         #DANA stuff should be here to visualize depending on what you wanna do
         #visualize(G,S)
+
 
 
 

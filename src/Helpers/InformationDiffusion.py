@@ -2,6 +2,7 @@ import math
 from concurrent.futures import ThreadPoolExecutor
 from threading import Condition
 from Helpers import progress
+from Visualization import Visualization as Visualization
 import time
 
 
@@ -304,6 +305,9 @@ class InformationDiffusion:
         totalNodes = len(graph.nodes())
         bestSet = 0
         bestNode = 0
+        #percentage of people that have seen the tweet on the network
+        seen = 0
+
 
         #Concurrent Variables
         threads = 6
@@ -314,8 +318,8 @@ class InformationDiffusion:
 
         print(f"InformationDiffusion starting nodes:")
 
-        while (bestSet/totalNodes) < percentage:
-            progress(bestSet, int(totalNodes*percentage), steps=1)
+        while seen < percentage:
+            progress(int(seen*1000), int(percentage*1000), steps=1)
 
             #Creating Threads and distributing Work
             for j in range(threads):
@@ -337,8 +341,13 @@ class InformationDiffusion:
                     bestSet = result[1] 
                     bestNode = result[0]
                 cond.release()
+
             
             S.add(bestNode)
+            steps = InformationDiffusion.ltm(graph,S)
+            result = Visualization.getNodesSeeingRetweet(graph, steps)
+            seen = (len(steps[-1]) + result[-1]['nodes'])/totalNodes
+
             i += 1
 
         return S
