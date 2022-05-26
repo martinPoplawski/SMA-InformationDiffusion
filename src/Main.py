@@ -227,24 +227,19 @@ def main():
 
         wholeG = nx.read_edgelist('data/sampled-graph.edgelist', nodetype=int, create_using=nx.DiGraph())
 
-        print("whole G",wholeG)
-
-      
         arg2 = args["-visualization"]
-        print("argument 2: ",arg2)
        
         arrayOfCommunities=createCommunityArray()
-        #communityNumber2=10
         
         Visualization.edges_weights(G) #test ok
         Visualization.neighbors_nodes(G) #test ok
         Visualization.numberOfEdges(G) #test ok
         Visualization.numberOfNodes(G) #test ok
 
-        Visualization.community(G) #TODO:need to check
-        Visualization.oneCommunityInGraph(wholeG,G)
-        Visualization.allCommunitiesInGraph(wholeG,arrayOfCommunities)
-        Visualization.spreading(G,steps) #TODO: need to check
+        Visualization.community(G) #test ok
+        Visualization.oneCommunityInGraph(wholeG,G) #TODO test
+        Visualization.allCommunitiesInGraph(wholeG,arrayOfCommunities) #test ok
+        Visualization.spreading(G,steps) #test ok
 
         Visualization.nbOfStepsToCover(G,steps) #test ok
         Visualization.nodesEdgesInCommunities(arrayOfCommunities) #test ok
@@ -252,7 +247,7 @@ def main():
 
 
         G2 = _getNxFromCSVFile(f"data/Comms/higgs-Comm-{arg2}.csv")
-        Visualization.compareTwoCommunities(G,G2,wholeG) #TODO: need whole graph
+        Visualization.compareTwoCommunities(G,G2,wholeG) #TODO test
 
         Visualization.centrality(G,S) #test ok
         #Visualization.centralityAllCommunities(arrayOfCommunities,10) #takes alot of time
