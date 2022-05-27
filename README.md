@@ -7,13 +7,12 @@ Todo issue list in Project
 Project structure can be adapted however you see fit. 
 
 ## Requirements
+* First you need to get the 'higgs-social_network.edgelist' file from [here (https://snap.stanford.edu/data/higgs-twitter.html) and save it in 'src/data' folder. 
+This file was too big to upload it to git. 
 * pip install networkx 
 * pip install matplotlib
 * pip install numpy
-* Download data sets from .... and store them in src/data
-
-
-* [Neo4j](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-neo4j-on-ubuntu-20-04)
+* pip install neo4j and [Neo4j](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-neo4j-on-ubuntu-20-04)
 * [Gephi](https://gephi.org/users/download/)
 
 ## How to run Program
