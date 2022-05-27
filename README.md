@@ -59,3 +59,14 @@ You have to run the program in the 'src' folder. Preprocessing is not necessary 
 *Visualization* choose a second community for comparison (Number is the file number in src/data/Comms)
 
 * python Main.py -visualization 15
+
+
+## How to use Gephi
+
+*To make different communities visible*
+
+* Upload .gexf file: "File" -> "Open"
+
+* Go to "Appeareance" -> "Nodes" -> "Partition" and select the attribute "community" -> click "Apply" and choose the colors for each community
+
+* Go to "Layout" -> select "ForceAtlas 2" -> click "Run"
