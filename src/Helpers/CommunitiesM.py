@@ -47,7 +47,7 @@ class CommunitiesM:
         """
 
         #Import prepocessed graph
-        Data = open('data/preprocessed_1653041656.csv', "r")
+        Data = open('data/preprocessed_1652172596.csv', "r")
         Graphtype = nx.DiGraph()
 
         print("importing Graph...")
