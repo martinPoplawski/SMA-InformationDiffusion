@@ -161,8 +161,8 @@ class InformationDiffusion:
             Stemp.add(node)
             steps = InformationDiffusion.ltm(graph, Stemp)
 
-            result = Visualization.getNodesSeeingRetweet(graph, steps)
-            seen = (len(steps[-1]) + result[-1]['nodes'])/totalNodes
+            result = Visualization.getNodesSeeingRetweet(graph, steps,False)
+            seen = (len(steps[-1]) + result[-1]['nbNodes'])/totalNodes
             if seen > bestPerc: 
                 bestNode = node
                 bestPerc = seen
@@ -376,8 +376,8 @@ class InformationDiffusion:
             
             S.add(bestNode)
             #steps = InformationDiffusion.ltm(graph,S)
-            #result = Visualization.getNodesSeeingRetweet(graph, steps)
-            #seen = (len(steps[-1]) + result[-1]['nodes'])/totalNodes
+            #result = Visualization.getNodesSeeingRetweet(graph, steps,False)
+            #seen = (len(steps[-1]) + result[-1]['nbNodes'])/totalNodes
             seen = bestSet
 
             i += 1
