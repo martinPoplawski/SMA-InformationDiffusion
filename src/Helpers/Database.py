@@ -20,11 +20,12 @@ def _getNxFromCSVFile(edgelist, vertexlist = None):
     """
     #generate vertexlist if not given
     if vertexlist == None:
+        print(edgelist)
         vertices = generateVertexListFromEdgelist(edgelist)
         exportVertexList(vertices, edgelist)
         vertexlist = f"{edgelist}_vertexlist.csv"
 
-    with open(edgelist, 'r') as elist, open(vertexlist, 'r') as vlist:
+    with open(f"data/{edgelist}", 'r') as elist, open(f"data/{vertexlist}", 'r') as vlist:
         lene = len(elist.readlines())
         lenv = len(vlist.readlines())
         elist.seek(0)

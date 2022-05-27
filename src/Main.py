@@ -32,7 +32,7 @@ S = set()
 
 def loadAllDataIntoNeo4j():
     filename = combineFiles()
-    G = _getNxFromCSVFile(f"data/{filename}.csv", f"data/{filename}_vertexlist.csv")    
+    G = _getNxFromCSVFile(f"{filename}.csv", f"{filename}_vertexlist.csv")    
     #pushNxToNeo4j(G)   
     
 def printHelp():
@@ -192,7 +192,7 @@ def main():
     #if -community is given, load the community into neo4j
     if args["-community"] > 0:
         comminityNumber = args["-community"]
-        G = _getNxFromCSVFile(f"data/Comms/higgs-Comm-{comminityNumber}.csv")
+        G = _getNxFromCSVFile(f"Comms/higgs-Comm-{comminityNumber}.csv")
         #TODO remove with DB
         #pushNxToNeo4j(G)     
 
@@ -246,7 +246,7 @@ def main():
         Visualization.nodesInfected(G,steps) #test ok
 
 
-        G2 = _getNxFromCSVFile(f"data/Comms/higgs-Comm-{arg2}.csv")
+        G2 = _getNxFromCSVFile(f"Comms/higgs-Comm-{arg2}.csv")
         Visualization.compareTwoCommunities(G,G2,wholeG) #TODO test
 
         Visualization.centrality(G,S) #test ok
