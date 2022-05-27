@@ -56,7 +56,7 @@ You have to run the program in the 'src' folder. Preprocessing is not necessary 
   * proposed values: -o percentage 0.7
 
 
-*Visualization* choose a second community for comparison (Number is the file number in src/data/Comms)
+*Visualization* choose a second community for comparison (Number is the file number in src/data/Comms): For more information about the functions for the visualization go to Helpers/Visualization.py.
 
 * python Main.py -visualization 15
 
