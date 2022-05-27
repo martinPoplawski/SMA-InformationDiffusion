@@ -2,7 +2,7 @@
 Social Media Analytics Project by Dana, Marco and Martin
 
 ## Requirements
-* First you need to get the 'higgs-social_network.edgelist' file from [here] (https://snap.stanford.edu/data/higgs-twitter.html) and save it in 'src/data' folder. 
+* First you need to get the 'higgs-social_network.edgelist' file from [here](https://snap.stanford.edu/data/higgs-twitter.html) and save it in 'src/data' folder. 
 This file was too big to upload it to git. 
 * pip install networkx 
 * pip install matplotlib
