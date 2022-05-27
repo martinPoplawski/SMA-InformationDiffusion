@@ -237,8 +237,8 @@ def main():
         Visualization.numberOfNodes(G) #test ok
 
         Visualization.community(G) #test ok
-        Visualization.oneCommunityInGraph(wholeG,G) #TODO test
-        Visualization.allCommunitiesInGraph(wholeG,arrayOfCommunities) #test ok
+        Visualization.oneCommunityInGraph(wholeG,G) #test ok
+        #Visualization.allCommunitiesInGraph(wholeG,arrayOfCommunities) #test ok
         Visualization.spreading(G,steps) #test ok
 
         Visualization.nbOfStepsToCover(G,steps) #test ok
@@ -247,26 +247,26 @@ def main():
 
 
         G2 = _getNxFromCSVFile(f"Comms/higgs-Comm-{arg2}.csv")
-        Visualization.compareTwoCommunities(G,G2,wholeG) #TODO test
+        Visualization.compareTwoCommunities(G,G2,wholeG)
 
         Visualization.centrality(G,S) #test ok
         #Visualization.centralityAllCommunities(arrayOfCommunities,10) #takes alot of time
-        Visualization.getNodesSeeingRetweet(G,steps) #test ok
+        Visualization.getNodesSeeingRetweet(G,steps,True) #test ok
        
 
 def createCommunityArray():
+    """
+    function to put all communities in an array
+    """
     x=0
     comm_array=[]
     while(True):
         try:
             comm = _getNxFromCSVFile('data/Comms/higgs-Comm-'+str(x)+'.csv')
             comm_array.append(comm)
-            print(comm)
             x=x+1
         except:
             break
-    #print("Nb of communities: ",len(comm_array))
-    print("nb of nodes communities: ",comm_array)
     return comm_array
 
 

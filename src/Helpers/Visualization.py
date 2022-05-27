@@ -138,7 +138,6 @@ class Visualization:
             for member in comm:
                 if(node==int(member)):
                     graph.nodes[node]["in_community"]=1
-                    print("incomm")
         nx.write_gexf(graph, "data/visualization/oneCommunityInG.gexf", version="1.2draft")
 
     
@@ -441,7 +440,7 @@ class Visualization:
         return nodes
 
 
-    def getNodesSeeingRetweet(graph, steps):
+    def getNodesSeeingRetweet(graph, steps, PRINTON):
 
         """
         Gets the nodes which see a retweet in each step
@@ -451,7 +450,8 @@ class Visualization:
         :return: array of nodes seeing retweets at each step
         """
 
-        print(f"============GET NODES SEEING RETWEET AT EACH STEP====================")
+        if(PRINTON):
+            print(f"============GET NODES SEEING RETWEET AT EACH STEP====================")
 
         nodesSeeingRetweet = [[]] * (len(steps))
 
@@ -478,7 +478,8 @@ class Visualization:
             nodesSeeingRetweet[index]={"nbNodes":len(np.unique(nodesSeeingRetweet[index])),"percentage":len(np.unique(nodesSeeingRetweet[index]))/len(graph.nodes())}
 
         #all neoghbours of activated nodes - activated nodes - doubles (x an y activated both let z see retweet)
-        print(nodesSeeingRetweet)
+        if(PRINTON):
+            print(nodesSeeingRetweet)
 
         return nodesSeeingRetweet
 

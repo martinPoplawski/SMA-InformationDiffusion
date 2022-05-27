@@ -139,6 +139,40 @@ class InformationDiffusion:
         cond.release()
         return [bestNode, bestSet]
 
+    def __partialCascPerc(graph, nodes, S, cond): 
+
+        """
+        Check for best node to add on given node Range based on biggest final set
+
+        :param graph: Graph for Algorithm
+        :param nodes: Node range to check 
+        :param S: Set of starting Nodes 
+        :param cond: Signal object to wake main thread
+       
+        :return: A list of the best node name and its Loss value 
+        """
+
+        totalNodes= len(graph.nodes())
+        bestPerc = 0
+
+        #Find the best node to add
+        for node in nodes:
+            Stemp = S.copy()
+            Stemp.add(node)
+            steps = InformationDiffusion.ltm(graph, Stemp)
+
+            result = Visualization.getNodesSeeingRetweet(graph, steps,False)
+            seen = (len(steps[-1]) + result[-1]['nbNodes'])/totalNodes
+            if seen > bestPerc: 
+                bestNode = node
+                bestPerc = seen
+
+        #Signal sleeping main thread to check again if necessary        
+        cond.acquire()
+        cond.notify()
+        cond.release()
+        return [bestNode, bestPerc]
+
 
     def __loss(graph, activated):
         """
@@ -322,7 +356,7 @@ class InformationDiffusion:
             for j in range(threads):
                 beg = int(j*(len(nodes)/threads))
                 end = int((j + 1)*(len(nodes)/threads))
-                futures.append(executor.submit(InformationDiffusion.__partialCascLen,graph, nodes[beg:end], S, cond))
+                futures.append(executor.submit(InformationDiffusion.__partialCascPerc,graph, nodes[beg:end], S, cond))
 
             #Checking Futures
             for future in futures: 
@@ -341,9 +375,10 @@ class InformationDiffusion:
 
             
             S.add(bestNode)
-            steps = InformationDiffusion.ltm(graph,S)
-            result = Visualization.getNodesSeeingRetweet(graph, steps)
-            seen = (len(steps[-1]) + result[-1]['nodes'])/totalNodes
+            #steps = InformationDiffusion.ltm(graph,S)
+            #result = Visualization.getNodesSeeingRetweet(graph, steps,False)
+            #seen = (len(steps[-1]) + result[-1]['nbNodes'])/totalNodes
+            seen = bestSet
 
             i += 1
 
